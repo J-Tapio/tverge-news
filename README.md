@@ -2,6 +2,14 @@
 
 ## About
 
+Unfortunately for me the site of The Verge is just too cluttered.
+I created this project where I could browse the latest news and visit the site for an article.
+
+[See Video](https://ik.imagekit.io/htg3gsxgz/vergenews.webm?ik-sdk-version=javascript-1.4.3&updatedAt=1663871323868)
+
+
+## About - Wails
+
 This is the official Wails React-TS template.
 
 You can configure the project by editing `wails.json`. More information about the project settings can be found
