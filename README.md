@@ -2,10 +2,10 @@
 
 ## About
 
-Unfortunately for me the site of The Verge is just too cluttered.
-I created this project where I could browse the latest news and visit the site for an article.
+Unfortunately for me the site of The Verge is just too cluttered and my eyes get weary from browsing the site.
+I created this app where I could browse the latest news and visit the site for an article.
 
-[See Video](https://ik.imagekit.io/htg3gsxgz/vergenews.webm?ik-sdk-version=javascript-1.4.3&updatedAt=1663871323868)
+[See video of app in action](https://ik.imagekit.io/htg3gsxgz/vergenews.webm?ik-sdk-version=javascript-1.4.3&updatedAt=1663871323868)
 
 
 ## About - Wails
