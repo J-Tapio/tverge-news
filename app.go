@@ -34,10 +34,11 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	go startScraper()
 }
 
-func (a *App) domready(ctx context.Context) {}
+func (a *App) domready(ctx context.Context) {
+	go startScraper(a)
+}
 
 func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 	dialog, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
@@ -83,7 +84,7 @@ func outputToTvergeArticles(c <-chan TvergeArticle) {
 	}
 }
 
-func startScraper() {
+func startScraper(app *App) {
 	for {
 		// If articles - remove old
 		if len(tvergeArticles) > 0 {
@@ -145,6 +146,7 @@ func startScraper() {
 			}
 		}
 		tvergeArticles = removeDuplicates(tvergeArticles)
+		runtime.EventsEmit(app.ctx,"news")
 		time.Sleep(1 * time.Hour)
 	}
 }
