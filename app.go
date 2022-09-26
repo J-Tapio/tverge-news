@@ -86,12 +86,12 @@ func outputToTvergeArticles(c <-chan TvergeArticle) {
 
 func startScraper(app *App) {
 	for {
-		// If articles - remove old
+		// Remove old articles
 		if len(tvergeArticles) > 0 {
 			tvergeArticles = []TvergeArticle{}
 		}
 		fmt.Println("Fetchin latest news from The Verge")
-		// Channel per site request
+		// Channel per site request/ goroutine
 		fromTech := make(chan TvergeArticle, 10)
 		fromScience := make(chan TvergeArticle, 10)
 		fromReviews := make(chan TvergeArticle, 10)

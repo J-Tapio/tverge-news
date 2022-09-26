@@ -7,12 +7,13 @@ import (
 	"strings"
 )
 
-//TODO: Quite possibly just a flaw in my selector - category somehow comes as a duplicate, eg. "WebWeb"??
-
 func category(c string, path string) string {
+	// If category not available somehow - category set from url path
 	if c == "" {
 		return path
 	}
+	// For some reason scraping returns eg. 'WebWeb'
+	// Return only one occurence of category word
 	firstChar := rune(c[0])
 	for i, character := range c {
 		if firstChar == character {
@@ -31,17 +32,17 @@ func categoryLink(link string, path string) string {
 
 // Regex and formatting for image src and srcSet values
 func scrapeImageSrc(source string) (img, srcSet string) {
-	
+
 	// srcSet
 	re, err := regexp.Compile(`srcSet="(.*?)"\ssrc`)
 	if err != nil {
 		log.Println("Error with regex: ", err)
-		return "", ""
+		return img, srcSet
 	}
 	re2, err := regexp.Compile(`/_next`)
 	if err != nil {
 		log.Println("Error with regex: ", err)
-		return "", ""
+		return img, srcSet
 	}
 
 	imgSrcSetMatch := re.FindStringSubmatch(source)
@@ -50,23 +51,19 @@ func scrapeImageSrc(source string) (img, srcSet string) {
 	if len(imgSrcSetMatch) > 0 {
 		srcSetUncleaned := re2.ReplaceAllString(imgSrcSetMatch[1], "https://www.theverge.com/_next")
 		srcSet = strings.Replace(srcSetUncleaned, "amp;", "", -1)
-	} else {
-		srcSet = ""
 	}
 
 	// src
 	re3, err := regexp.Compile(`src="(.*?)"\sdecoding`)
 	if err != nil {
 		log.Println("Error with regex: ", err)
-		return "", ""
+		return img, srcSet
 	}
 
 	imgSrcMatch := re3.FindStringSubmatch(source)
 	if len(imgSrcMatch) > 0 {
 		imgUncleaned := "https://www.theverge.com" + imgSrcMatch[1]
 		img = strings.Replace(imgUncleaned, "amp;", "", -1)
-	} else {
-		img = ""
 	}
 
 	return img, srcSet
@@ -100,7 +97,7 @@ func scrapeTheVerge(c chan<- TvergeArticle, URL string, path string) {
 		// Image
 		tvergeArticle.Img, tvergeArticle.ImgSrcSet = scrapeImageSrc(h.ChildText("div:last-of-type div:last-of-type .block a span img+noscript"))
 
-		if tvergeArticle != (TvergeArticle{})  && tvergeArticle.URL != "https://www.theverge.com" && tvergeArticle.Img != "https://www.theverge.com" {
+		if tvergeArticle != (TvergeArticle{}) && tvergeArticle.URL != "https://www.theverge.com" && tvergeArticle.Img != "https://www.theverge.com" {
 			c <- tvergeArticle
 		}
 	})
