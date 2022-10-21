@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gocolly/colly"
 	"log"
 	"regexp"
 	"strings"
+	
+	"github.com/gocolly/colly"
 )
 
 func category(c string, path string) string {
@@ -32,28 +33,20 @@ func categoryLink(link string, path string) string {
 
 // Regex and formatting for image src and srcSet values
 func scrapeImageSrc(source string) (img, srcSet string) {
-
 	// srcSet
 	re, err := regexp.Compile(`srcSet="(.*?)"\ssrc`)
 	if err != nil {
 		log.Println("Error with regex: ", err)
 		return img, srcSet
 	}
-	re2, err := regexp.Compile(`/_next`)
-	if err != nil {
-		log.Println("Error with regex: ", err)
-		return img, srcSet
-	}
-
 	imgSrcSetMatch := re.FindStringSubmatch(source)
-	// Replace srcSet strings with URL
-	// Finally clean 'amp;' - unicode from the strings
+	srcSet = imgSrcSetMatch[1]
+	// Clean 'amp;' from the strings
 	if len(imgSrcSetMatch) > 0 {
-		srcSetUncleaned := re2.ReplaceAllString(imgSrcSetMatch[1], "https://www.theverge.com/_next")
-		srcSet = strings.Replace(srcSetUncleaned, "amp;", "", -1)
+		srcSet = strings.Replace(srcSet, "amp;", "", -1)
 	}
 
-	// src
+	// imgSrc
 	re3, err := regexp.Compile(`src="(.*?)"\sdecoding`)
 	if err != nil {
 		log.Println("Error with regex: ", err)
@@ -61,6 +54,7 @@ func scrapeImageSrc(source string) (img, srcSet string) {
 	}
 
 	imgSrcMatch := re3.FindStringSubmatch(source)
+	img = imgSrcMatch[1]
 	if len(imgSrcMatch) > 0 {
 		imgUncleaned := "https://www.theverge.com" + imgSrcMatch[1]
 		img = strings.Replace(imgUncleaned, "amp;", "", -1)
