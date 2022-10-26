@@ -9,6 +9,15 @@ type NewsCardProps = {
   imgSrcSet: string;
 };
 
+function formatTimeStamp(timeStamp: string):string {
+  let date = new Date(timeStamp)
+  return (
+    date.toLocaleDateString("en-us", { dateStyle: "medium" }) +
+    " - " +
+    date.toLocaleTimeString("en-us", { timeStyle: "short" })
+  );
+}
+
 export default function NewsCard({article}:{article:NewsCardProps}) {
   return (
     <div className="flex items-center my-5">
@@ -31,7 +40,7 @@ export default function NewsCard({article}:{article:NewsCardProps}) {
         </h2>
         <div className="flex sm:text-[0.85rem] md:text-[1.1rem]">
           <p className="text-[#3cffca]">{article.author}</p>
-          <p className="text-[#bdbdbd] ml-2">{article.date}</p>
+          <p className="text-[#bdbdbd] ml-2">{formatTimeStamp(article.date)}</p>
         </div>
       </div>
       <div className="ml-auto max-w-[75px] rounded-[3px] sm:min-w-[100px] md:max-w-[150px] cursor-pointer">

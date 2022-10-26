@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -23,6 +23,15 @@ type TvergeArticle struct {
 	URL          string `json:"URL"`
 	Img          string `json:"img"`
 	ImgSrcSet    string `json:"imgSrcSet"`
+}
+
+var sourceURL = "https://www.theverge.com"
+
+var categoryXmlURL = map[string]string{
+	"Tech":          "https://www.theverge.com/rss/tech/index.xml",
+	"Science":       "https://www.theverge.com/rss/science/index.xml",
+	"Reviews":       "https://www.theverge.com/rss/reviews/index.xml",
+	"Entertainment": "https://www.theverge.com/rss/entertainment/index.xml",
 }
 
 // NewApp creates a new App application struct
@@ -58,25 +67,6 @@ func (a *App) Latest() []TvergeArticle {
 	return tvergeArticles
 }
 
-// For some reason The Verge mixes up news within different sections, eg.
-// Entertainment news article might be found within Science section
-// Hence the need for duplicate removal.
-func removeDuplicates(articles []TvergeArticle) []TvergeArticle {
-	var uniqueArticles []TvergeArticle
-	// Make map of [string]bool - in this case the url should be unique
-	keys := make(map[string]bool)
-	// Loop articles
-	for _, article := range articles {
-		if keys[article.URL] {
-			continue
-		} else {
-			keys[article.URL] = true
-			uniqueArticles = append(uniqueArticles, article)
-		}
-	}
-	return uniqueArticles
-}
-
 func outputToTvergeArticles(c <-chan TvergeArticle) {
 	for {
 		article := <-c
@@ -90,8 +80,9 @@ func startScraper(app *App) {
 		if len(tvergeArticles) > 0 {
 			tvergeArticles = []TvergeArticle{}
 		}
-		fmt.Println("Fetchin latest news from The Verge")
-		// Channel per site request/ goroutine
+
+		log.Println("Fetchin latest news from The Verge")
+		// Channel per site request / goroutine
 		fromTech := make(chan TvergeArticle, 10)
 		fromScience := make(chan TvergeArticle, 10)
 		fromReviews := make(chan TvergeArticle, 10)
@@ -103,10 +94,10 @@ func startScraper(app *App) {
 		fromReviewsOpen := true
 		fromEntOpen := true
 
-		go scrapeTheVerge(fromTech, "https://www.theverge.com/tech", "Tech")
-		go scrapeTheVerge(fromScience, "https://www.theverge.com/science", "Science")
-		go scrapeTheVerge(fromReviews, "https://www.theverge.com/reviews", "Reviews")
-		go scrapeTheVerge(fromEnt, "https://www.theverge.com/entertainment", "Entertainment")
+		go scrapeTheVergeXML(fromTech, categoryXmlURL["Tech"], "Tech")
+		go scrapeTheVergeXML(fromScience, categoryXmlURL["Science"], "Science")
+		go scrapeTheVergeXML(fromReviews, categoryXmlURL["Reviews"], "Reviews")
+		go scrapeTheVergeXML(fromEnt, categoryXmlURL["Entertainment"], "Entertainment")
 		go outputToTvergeArticles(toVergeArticles)
 
 		for fromTechOpen || fromScienceOpen || fromReviewsOpen || fromEntOpen {
@@ -145,9 +136,8 @@ func startScraper(app *App) {
 				}
 			}
 		}
-		tvergeArticles = removeDuplicates(tvergeArticles)
-		runtime.EventsEmit(app.ctx,"news")
+
+		runtime.EventsEmit(app.ctx, "news")
 		time.Sleep(1 * time.Hour)
 	}
 }
-

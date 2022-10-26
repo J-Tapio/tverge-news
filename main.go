@@ -9,7 +9,6 @@ import (
 
 //go:embed frontend/dist
 var assets embed.FS
-
 var tvergeArticles []TvergeArticle
 
 func main() {
